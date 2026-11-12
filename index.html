@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhận Key Hệ Thống</title>
+    <style>
+        body { font-family: sans-serif; background: #1e1e2e; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #2a2a3c; padding: 30px; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .key { background: #11111b; padding: 15px; font-size: 22px; font-weight: bold; color: #a6e3a1; border-radius: 8px; margin: 20px 0; letter-spacing: 2px; border: 1px dashed #a6e3a1; }
+        button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .err { color: #f38ba8; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="box" id="app">Đang kiểm tra dữ liệu...</div>
+
+    <script>
+        const app = document.getElementById("app");
+        const params = new URLSearchParams(window.location.search);
+        const encoded = params.get("d");
+        const ref = document.referrer.toLowerCase();
+
+        if (!encoded || !ref.includes("link4m")) {
+            app.innerHTML = `<p class="err">⛔ PHÁT HIỆN HÀNH VI BYPASS!</p><p>Vui lòng vượt link hợp lệ từ hệ thống để lấy Key.</p>`;
+        } else {
+            try {
+                const rawKey = atob(encoded);
+                app.innerHTML = `
+                    <h2>🎉 VƯỢT LINK THÀNH CÔNG</h2>
+                    <p>Copy mã bên dưới và quay lại Discord nhập lệnh <b>/nhapkey</b>:</p>
+                    <div class="key" id="keyText">${rawKey}</div>
+                    <button onclick="copyKey()">📋 Copy Mã Key</button>
+                `;
+            } catch (e) {
+                app.innerHTML = `<p class="err">❌ Liên kết không hợp lệ hoặc bị hỏng!</p>`;
+            }
+        }
+
+        function copyKey() {
+            navigator.clipboard.writeText(document.getElementById("keyText").innerText);
+            alert("Đã copy Key! Hãy quay lại Discord và gõ /nhapkey");
+        }
+    </script>
+</body>
+</html>
