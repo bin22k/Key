@@ -3,43 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhận Key Hệ Thống</title>
+    <title>Nhận Key Hệ Thống - PTKA</title>
     <style>
-        body { font-family: sans-serif; background: #1e1e2e; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #2a2a3c; padding: 30px; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-        .key { background: #11111b; padding: 15px; font-size: 22px; font-weight: bold; color: #a6e3a1; border-radius: 8px; margin: 20px 0; letter-spacing: 2px; border: 1px dashed #a6e3a1; }
-        button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .err { color: #f38ba8; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #11111b;
+            color: #cdd6f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+        .box {
+            background: #1e1e2e;
+            padding: 28px 24px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid #313244;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(137, 180, 250, 0.15);
+            color: #89b4fa;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #fff;
+        }
+        p {
+            margin: 0 0 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #a6adc8;
+        }
+        .key {
+            background: #11111b;
+            padding: 16px;
+            font-size: 24px;
+            font-weight: 800;
+            color: #a6e3a1;
+            border-radius: 10px;
+            margin: 18px 0;
+            letter-spacing: 2px;
+            border: 1.5px dashed #a6e3a1;
+            user-select: all;
+            word-break: break-all;
+        }
+        button {
+            background: #89b4fa;
+            color: #11111b;
+            border: none;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+        button.copied { background: #a6e3a1; }
+        .err-title {
+            color: #f38ba8;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .cmd-hint {
+            background: #181825;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #f9e2af;
+            margin-top: 14px;
+        }
     </style>
 </head>
 <body>
-    <div class="box" id="app">Đang kiểm tra dữ liệu...</div>
+    <div class="box" id="app">Đang xác thực dữ liệu...</div>
 
     <script>
         const app = document.getElementById("app");
         const params = new URLSearchParams(window.location.search);
         const encoded = params.get("d");
-        const ref = document.referrer.toLowerCase();
+        const ref = (document.referrer || "").toLowerCase();
 
-        if (!encoded || !ref.includes("link4m")) {
-            app.innerHTML = `<p class="err">⛔ PHÁT HIỆN HÀNH VI BYPASS!</p><p>Vui lòng vượt link hợp lệ từ hệ thống để lấy Key.</p>`;
+        const isLink4m = ref.includes("link4m");
+        const isLootLabs = ref.includes("loot");
+
+        if (!encoded || (!isLink4m && !isLootLabs)) {
+            app.innerHTML = `
+                <div class="err-title">⛔ PHÁT HIỆN HÀNH VI BYPASS!</div>
+                <p>Trang này chỉ hiển thị Key khi bạn vượt link hợp lệ từ hệ thống <b>Link4m</b> hoặc <b>LootLabs</b>.</p>
+                <div class="cmd-hint">Quay lại Discord và dùng lệnh /getkey</div>
+            `;
         } else {
             try {
-                const rawKey = atob(encoded);
+                const rawKey = atob(encoded).trim();
+                const sourceName = isLootLabs ? "Cổng LootLabs (+350 Xu)" : "Cổng Link4m (+250 Xu)";
                 app.innerHTML = `
+                    <div class="badge">${sourceName}</div>
                     <h2>🎉 VƯỢT LINK THÀNH CÔNG</h2>
-                    <p>Copy mã bên dưới và quay lại Discord nhập lệnh <b>/nhapkey</b>:</p>
+                    <p>Bấm nút bên dưới để sao chép mã Key, sau đó quay lại Discord nhập lệnh:</p>
                     <div class="key" id="keyText">${rawKey}</div>
-                    <button onclick="copyKey()">📋 Copy Mã Key</button>
+                    <button id="copyBtn" onclick="copyKey()">📋 Copy Mã Key</button>
+                    <div class="cmd-hint">/nhapkey ${rawKey}</div>
                 `;
             } catch (e) {
-                app.innerHTML = `<p class="err">❌ Liên kết không hợp lệ hoặc bị hỏng!</p>`;
+                app.innerHTML = `
+                    <div class="err-title">❌ LIÊN KẾT KHÔNG HỢP LỆ</div>
+                    <p>Mã dữ liệu bị hỏng hoặc thiếu ký tự. Vui lòng tạo link mới bằng lệnh <b>/getkey</b>.</p>
+                `;
             }
         }
 
         function copyKey() {
-            navigator.clipboard.writeText(document.getElementById("keyText").innerText);
-            alert("Đã copy Key! Hãy quay lại Discord và gõ /nhapkey");
+            const keyEl = document.getElementById("keyText");
+            const btn = document.getElementById("copyBtn");
+            if (!keyEl) return;
+
+            const text = keyEl.innerText;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => markCopied(btn)).catch(() => fallbackCopy(text, btn));
+            } else {
+                fallbackCopy(text, btn);
+            }
+        }
+
+        function fallbackCopy(text, btn) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand("copy");
+                markCopied(btn);
+            } catch (err) {
+                alert("Hãy nhấn giữ vào mã Key để sao chép thủ công!");
+            }
+            document.body.removeChild(ta);
+        }
+
+        function markCopied(btn) {
+            btn.innerText = "✅ Đã Copy Mã Key!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+                btn.innerText = "📋 Copy Mã Key";
+                btn.classList.remove("copied");
+            }, 3000);
         }
     </script>
 </body>
